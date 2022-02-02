@@ -6,3 +6,7 @@ __pycache__/
 # System temporary files
 .swp
 .DS_Store
+
+# Data file under dataset/ directory
+dataset/recipescape*.json
+dataset/*.npz
