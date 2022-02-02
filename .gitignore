@@ -1,0 +1,8 @@
+# Python/Jupyter
+env/
+__pycache__/
+.ipynb_checkpoints/
+
+# System temporary files
+.swp
+.DS_Store
