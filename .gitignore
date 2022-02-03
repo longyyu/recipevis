@@ -10,3 +10,4 @@ __pycache__/
 # Data file under dataset/ directory
 dataset/recipescape*.json
 dataset/*.npz
+dataset/bbcgoodfood.json
