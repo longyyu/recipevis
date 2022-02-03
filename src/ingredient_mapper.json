@@ -1,6 +1,9 @@
 {
-    "extra virgin olive oil": "olive oil",
-    "extra-virgin olive oil": "olive oil",
+    "extra virgin olive oil": "oil",
+    "extra-virgin olive oil": "oil",
+    "olive oil": "oil",
+    "rapeseed oil": "oil",
+    "sunflower oil": "oil",
     "vegetarian mozzarella cheese": "mozzarella",
     "garlic cloves": "garlic clove",
     "tomato pur\u00c3\u00a9e": "tomato",
@@ -69,5 +72,11 @@
     "button mushroom": "mushroom",
     "chilli flakes": "chilli",
     "green chilli": "chilli",
-    "red chilli": "chilli"
+    "red chilli": "chilli",
+    "caster sugar": "sugar",
+    "golden caster sugar": "sugar",
+    "brown sugar": "sugar",
+    "light brown sugar": "sugar",
+    "new potato": "potato",
+    "Jersey Royal potato": "potato"
 }
