@@ -1,0 +1,127 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Heatmap</title>
+</head>
+<body>
+
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
+<div id="my_dataviz">
+    <div id="tooltip"></div>
+</div>
+
+<script>
+    // set the dimensions and margins of the graph
+    var margin = {top: 10, right: 10, bottom: 20, left: 150},
+        outerWidth = 1150, outerHeight = 1250,
+        width = outerWidth - margin.left - margin.right,
+        height = outerHeight - margin.top - margin.bottom,
+        legend_x = 20,
+        legend_y = height/2 - 120;
+
+    var tooltip = d3.select("#tooltip")
+        .style("width", "230px")
+        .style("height", "100px")
+        .style("font-size", "14px")
+        .style("background", "rgba(255, 255, 255, .6)");
+
+    // append the svg object to the body of the page
+    var svg = d3.select("#my_dataviz")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
+
+    //Read the data
+    d3.csv("https://gist.githubusercontent.com/longyyu/d9883af67dd05f1bd909d970bed07c10/raw/585c01de1dfa33981363d2f09ff2cb222c8998f5/recipenlg-heatmap.csv", function(data) {
+        // Labels of row and columns
+        var recipeIds = [...new Set(data.map(d => d.recipe_id))],
+            ingds = [...new Set(data.map(d => d.ingd))],
+            groups = [...new Set(data.map(d => d.group))];
+        // Build X scales and axis:
+        var x = d3.scaleBand()
+            .range([ 0, width ])
+            .domain(recipeIds)
+            .padding(0.01);
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(
+                d3.axisBottom(x)
+                    .tickValues(recipeIds.filter(function(d, i){ return !(i%10)}))
+            )
+
+        // Build Y scales and axis:
+        var y = d3.scaleBand()
+            .range([ 0, height ])
+            .domain(ingds)
+            .padding(0.01);
+        svg.append("g")
+            .attr("class", "ytick")
+            .style("z-index", 9)
+            .style("font-size", "12px")
+            .call(d3.axisLeft(y));
+        // d3.selectAll(".ytick text")
+        //     .nodes()
+        //     .forEach((t, i) => {
+        //         if (i%2) {
+        //             d3.select(t)
+        //                 .attr("transform", "translate(120, 0)")
+        //                 .style("text-align", "left")
+        //         }
+        //     });
+
+        // Build color scale
+        var myColor = d3.scaleOrdinal(d3.schemeCategory10)
+            .domain(groups);
+        // Create legend
+        svg.append("g")
+            .attr("class", "legendQuant")
+            .attr("transform", `translate(${legend_x}, ${legend_y})`)
+            .style("font-size", "14px")
+            .style("text-transform", "capitalize");
+        var legend = d3.legendColor()
+            .labels(groups)
+            .title("Recipe group")
+            .scale(myColor);
+        svg.select(".legendQuant")
+           .call(legend);
+        document.querySelector("svg").onwheel = function() {
+            d3.select(".legendQuant").attr("transform", `translate(${legend_x}, ${legend_y+window.scrollY})`)
+        };
+
+        // Plot rectangles
+        svg.selectAll()
+            .data(data, function(d) {return d.recipe_id+':'+d.ingd;})
+            .enter()
+            .append("rect")
+            .attr("x", function(d) { return x(d.recipe_id) })
+            .attr("y", function(d) { return y(d.ingd) })
+            .attr("width", x.bandwidth() )
+            .attr("height", y.bandwidth() )
+            .style("fill", function(d) { return myColor(d.group)} )
+            .style("opacity", 0.5)
+            .on("mouseover", function(d) {
+                d3.select(this).style("opacity", 1)
+                tooltip
+                    .style("opacity", 0.9)
+                    .html(`Recipe #${d.recipe_id}, ${d.ingd}<br/>${d.ingd_text.replace("^", "<br/>")}`)
+            })
+            .on("mousemove", function() {
+                tooltip
+                    .style("transform", `translate(${d3.event.pageX+10}px, ${d3.event.pageY-28}px)`)
+            })
+            .on("mouseleave", function() {
+                d3.select(this).style("opacity", 0.5)
+                tooltip
+                    .style("opacity", 0)
+            })
+
+    })
+
+</script>
+    
+</body>
+</html>
