@@ -62,7 +62,6 @@
 <script src="https://unpkg.com/d3-simple-slider"></script>
 
 <script>
-/* global d3 */
 
 var canvas = d3.select("#network"),
     ctx = canvas.node().getContext("2d"),
@@ -72,7 +71,7 @@ var canvas = d3.select("#network"),
         // attracts nodes to the center of the svg area
         .force("center", d3.forceCenter(width / 2, height / 2))
         // adds repulsion between nodes
-        .force("charge", d3.forceManyBody().strength(-500))
+        .force("charge", d3.forceManyBody().strength(-600))
         // provides links between nodes
         .force("link", d3.forceLink().id( d => d.ingd )),
     dragged = d3.drag()
@@ -94,12 +93,10 @@ var canvas = d3.select("#network"),
             d3.event.subject.fx = null;
             d3.event.subject.fy = null;
         });
-canvas.call(dragged);
+// canvas.call(dragged);
 
 var color = d3.scaleOrdinal(d3.schemeCategory20),
-    nodeThresDefault=100, linkThresDefault=10,
-    nodeThresVal = nodeThresDefault,
-    linkThresVal = linkThresDefault;
+    nodeThresDefault=100, linkThresDefault=10;
 var nodeSliderSVG = d3.select('#nodeSlider')
     .append('svg')
     .attr("height", "60px")
@@ -111,14 +108,18 @@ var linkSliderSVG = d3.select('#linkSlider')
     .append('g')
     .attr('transform', 'translate(10, 10)');
 
-d3.json("https://gist.githubusercontent.com/longyyu/c792de12a0ba5abcc5c8d660f27bdaf5/raw/9fe0812b966b9a1c4d4c43b288151bb0e88d85f0/recipenlg-network-by-group.json", function (err, dataAll) {
+const dataUrl = "https://gist.githubusercontent.com/longyyu/c792de12a0ba5abcc5c8d660f27bdaf5/raw/9fe0812b966b9a1c4d4c43b288151bb0e88d85f0/recipenlg-network-by-group.json"
+d3.json(dataUrl, function (err, dataAll) {
     if (err) throw err;
 
     // initialize group choice
     var allGroups = Object.keys(dataAll),
-        group = allGroups[0];
-    console.log(group);
-    drawGroup(group);
+        groupShown = allGroups[0],
+        data = null,
+        nodesShown = null,
+        itemsShown = null,
+        linksShown = null;
+    drawGroup();
 
     d3.select("#selectButton")
         .style("position", "relative")
@@ -132,65 +133,85 @@ d3.json("https://gist.githubusercontent.com/longyyu/c792de12a0ba5abcc5c8d660f27b
             .attr("value", opt => opt); // corresponding value returned by the button
 
     d3.select("#selectButton").on("change", function(d) {
-        group = d3.select(this).property("value");
-        drawGroup(group);
+        groupShown = d3.select(this).property("value");
+        drawGroup();
     })
 
-    function drawGroup(group) {
+    function drawGroup() {
+        data = dataAll[groupShown];
+        simulation.nodes(data.nodes);
+        simulation.force("link").links(data.links);
+        simulation.on("tick", updatePlot);
+        var nodeThresVal = nodeThresDefault,
+            linkThresVal = linkThresDefault;
+        canvas.call(dragged);
+        updateNodes();
+
         var nodeSlider = d3.sliderBottom()
                 .min(0)
-                .max(250)
+                .max(330) // Math.max(...data.nodes.map(d => d.freq))
                 .width(200)
                 .ticks(5)
                 .default(nodeThresDefault)
                 .on('onchange', val => {
                     nodeThresVal = val;
-                    update();
+                    updateNodes();
                 }),
             linkSlider = d3.sliderBottom()
                 .min(0)
-                .max(180)
+                .max(300) // Math.max(...data.links.map(l => l.count))
                 .width(200)
                 .ticks(5)
                 .default(linkThresDefault)
                 .on('onchange', val => {
                     linkThresVal = val;
-                    update();
+                    updateLinks();
                 });
         nodeSliderSVG.call(nodeSlider);
         linkSliderSVG.call(linkSlider);
 
-        var data = dataAll[group];
-        simulation.nodes(data.nodes);
-        simulation.force("link").links(data.links);
-        simulation.on("tick", update);
+        function updateNodes() {
+            nodesShown = data.nodes.filter(d => d.freq > nodeThresVal);
+            itemsShown = nodesShown.map(d => d.ingd);
+            linksShown = data.links.filter((l) => {
+                return ((itemsShown.indexOf(l.source.ingd) != -1) &&
+                (itemsShown.indexOf(l.target.ingd) != -1))
+            });
+            updatePlot();
+        }
 
-        function update() {
+        function updateLinks() {
+            linksShown = data.links.filter(l => l.count > linkThresVal);
+            itemsShown = new Set(linksShown.map(l => l.source.ingd).concat(linksShown.map(l => l.target.ingd)));
+            nodesShown = data.nodes.filter(d => itemsShown.has(d.ingd));
+            updatePlot();
+        }
+
+        function updatePlot() {
             ctx.clearRect(0, 0, width, height);
-
             ctx.beginPath();
             ctx.globalAlpha = 0.2;
             ctx.strokeStyle = "#aaa";
-            data.links.filter(l => l.count > linkThresVal).forEach((l) => { // draws links
+            linksShown.forEach((l) => { // draws links
                 ctx.moveTo(l.source.x, l.source.y);
                 ctx.lineTo(l.target.x, l.target.y);
             });
             ctx.stroke();
 
-            ctx.font = '14px sans-serif';  
-            data.nodes.filter(d => d.freq > nodeThresVal).forEach((d) => { // draw nodes
+            ctx.font = '14px sans-serif';
+            nodesShown.forEach((d) => { // draw nodes
                 ctx.beginPath();
                 ctx.fillStyle = color(d.party); // update!
                 ctx.moveTo(d.x, d.y);
-                ctx.arc(d.x, d.y, 2 + d.freq / 5, 0, Math.PI*2);
+                ctx.arc(d.x, d.y, 2 + d.freq / 10, 0, Math.PI*2);
                 ctx.globalAlpha = .45;
                 ctx.fill();
                 ctx.globalAlpha = .95;
                 ctx.fillText(d.ingd, d.x, d.y);
             });
-        }
-
+        } // updatePlot()
     }
+
 
 });
 
