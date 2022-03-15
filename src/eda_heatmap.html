@@ -8,7 +8,6 @@
 <script src="https://d3js.org/d3.v4.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
 <div id="my_dataviz">
-    <div id="tooltip"></div>
 </div>
 
 <script>
@@ -18,23 +17,24 @@
         width = outerWidth - margin.left - margin.right,
         height = outerHeight - margin.top - margin.bottom,
         legend_x = 20,
-        legend_y = height/2 - 120;
+        legend_y = height/2 - 90;
 
-    var tooltip = d3.select("#tooltip")
+    var tooltip = d3.select("#my_dataviz")
+        .append("div")
+        .attr("id", "tooltip")
         .style("width", "230px")
-        .style("height", "100px")
+        .style("height", "0px")
         .style("font-size", "14px")
         .style("background", "rgba(255, 255, 255, .6)");
 
     // append the svg object to the body of the page
     var svg = d3.select("#my_dataviz")
         .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
+        .style("width", outerWidth)
+        .style("height", outerHeight)
         .append("g")
-        .attr("transform",
-                "translate(" + margin.left + "," + margin.top + ")");
-
+            .attr("transform", `translate(${margin.left}, ${margin.top})`);
+    
     //Read the data
     d3.csv("https://gist.githubusercontent.com/longyyu/d9883af67dd05f1bd909d970bed07c10/raw/585c01de1dfa33981363d2f09ff2cb222c8998f5/recipenlg-heatmap.csv", function(data) {
         // Labels of row and columns
@@ -50,6 +50,7 @@
             .attr("transform", "translate(0," + height + ")")
             .call(
                 d3.axisBottom(x)
+                    .tickSize(0)
                     .tickValues(recipeIds.filter(function(d, i){ return !(i%10)}))
             )
 
@@ -62,16 +63,7 @@
             .attr("class", "ytick")
             .style("z-index", 9)
             .style("font-size", "12px")
-            .call(d3.axisLeft(y));
-        // d3.selectAll(".ytick text")
-        //     .nodes()
-        //     .forEach((t, i) => {
-        //         if (i%2) {
-        //             d3.select(t)
-        //                 .attr("transform", "translate(120, 0)")
-        //                 .style("text-align", "left")
-        //         }
-        //     });
+            .call(d3.axisLeft(y).tickSize(0));
 
         // Build color scale
         var myColor = d3.scaleOrdinal(d3.schemeCategory10)
@@ -80,7 +72,7 @@
         svg.append("g")
             .attr("class", "legendQuant")
             .attr("transform", `translate(${legend_x}, ${legend_y})`)
-            .style("font-size", "14px")
+            .style("font-size", "12px")
             .style("text-transform", "capitalize");
         var legend = d3.legendColor()
             .labels(groups)
@@ -88,9 +80,10 @@
             .scale(myColor);
         svg.select(".legendQuant")
            .call(legend);
-        document.querySelector("svg").onwheel = function() {
-            d3.select(".legendQuant").attr("transform", `translate(${legend_x}, ${legend_y+window.scrollY})`)
-        };
+        // document.querySelector("#svgLegend").onwheel = function(event) {
+        //     d3.select(".legendQuant")
+        //         .attr("transform", `translate(${legend_x}, ${legend_y+window.scrollY})`)
+        // };
 
         // Plot rectangles
         svg.selectAll()
