@@ -12,3 +12,9 @@ echo $VIRTUAL_ENV
 which python3
 which pip
 ```
+
+## Demo
+
+### V1 (2022.03.17)
+
+![demo v1 preview](demo/thumbnails/v1.png)
