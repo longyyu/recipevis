@@ -1,0 +1,85 @@
+:root{
+    --color-front: #1a1a1a;
+    --color-secondary: #ccd0be;
+    --color-accent: rgba(204, 208, 190, 0.5);
+    --font-size-heading: 40px;
+    --font-size-subheading: 25px;
+    --font-size-read: 20px;
+    --font-size-small: 18px;
+    --font-weight-normal: 300;
+    --font-weight-heavy: 400;
+    --font-family-accent: "Gill Sans", sans-serif;
+    --font-family-read: "Open Sans", sans-serif;
+}
+
+body{
+    width: 95%;
+    font-family: var(--font-family-read);
+    font-size: var(--font-size-read);
+    font-weight: var(--font-weight-normal);
+}
+
+h1, h2{
+    font-family: var(--font-family-accent);
+    font-weight: var(--font-weight-heavy);
+    margin: 5px 0;
+}
+
+h1{
+    font-size: var(--font-size-heading);
+}
+
+h2{
+    font-size: var(--font-size-subheading);
+}
+
+#wiki-info{
+    display: grid;
+    grid-template-columns: 30% 67%;
+    column-gap: 3%;
+    align-items: center;
+}
+
+#wiki-info img{
+    width: 100%;
+}
+
+#description, .todo{
+    font-size: var(--font-size-small);
+}
+
+.todo{
+    color: brown;
+}
+
+.dashboard{
+    width: 100%;
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 65% 35%;
+    column-gap: 20px;
+}
+
+.col-1{
+    width: 100%;
+}
+
+.col-2{
+    width: 100%;
+    display: grid;
+    grid-template-rows: 1fr;
+    row-gap: 20px;;
+}
+
+.col-1>div.title, .col-2>div{
+    min-height: 20vh;
+    background-color: #f4f4f4;
+}
+
+.points {
+    visibility: hidden;
+}
+
+.points:hover {
+    visibility: visible;
+}
