@@ -1,11 +1,12 @@
 <script>
-    import MainBar from './MainBar.svelte';
-    import MainTile from './MainTile.svelte';
+    import * as d3 from 'd3';
+    import MainVis from './MainVis.svelte';
     import IngdMapManager from './IngdMapManager.svelte';
-    let mainVisAggr = 1;
-    function toggle() {
-        mainVisAggr = 1 - mainVisAggr;
+
+    async function loadData() {
+        return await d3.csv("https://gist.githubusercontent.com/longyyu/d0bba5e9f7f6bd6e523382019137153b/raw/a5cc86a0bef4194cefc73a562520ab99270fa069/demo-ccc-recipes.csv");
     }
+    let promise = loadData();
 </script>
 
 <div class="dashboard">
@@ -25,13 +26,13 @@
             <li>Collapse columns to show ingredient summ stats (frequencies, avg pct)</li>
             <li>Drag and drop to reorder rows/columns</li>
             <li>Order column and set color by ingredient groups</li>
-            {#if mainVisAggr}
-                <button on:click={toggle}>Individual Recipe View</button>
-                <MainBar/>
-            {:else}
-                <button on:click={toggle}>Aggregated View</button>
-                <MainTile/>
-            {/if}
+            {#await promise}
+                <p>...loading...</p>
+            {:then data}
+                <MainVis {data}/>
+            {:catch error}
+                <p>{error.message}</p>
+            {/await}
         </ul>
     </div>
     <div class="col-2">
@@ -59,10 +60,3 @@
     </div>
     
 </div>
-
-<style>
-    button {
-        padding: 5px;
-        font-size: var(--font-size-small);
-    }
-</style>
