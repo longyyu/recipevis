@@ -2,11 +2,41 @@
     import * as d3 from 'd3';
     import MainVis from './MainVis.svelte';
     import IngdMapManager from './IngdMapManager.svelte';
+    import { recipeSelected } from './stores.js';
 
     async function loadData() {
         return await d3.csv("https://gist.githubusercontent.com/longyyu/d0bba5e9f7f6bd6e523382019137153b/raw/a5cc86a0bef4194cefc73a562520ab99270fa069/demo-ccc-recipes.csv");
     }
     let promise = loadData();
+
+    function showRecipe(datum) {
+        const detailBox = d3.select("#detail-box");
+        detailBox.selectAll("div").remove();
+        let content = detailBox.append("div")
+            .attr("id", "recipe-box")
+            .style("font-size", "var(--font-size-small)");
+        content.append("p").html(`#${datum.recipe_id}: ${datum.title}`);
+        content
+            .append("ul")
+            .attr("class", "ingd-list")
+            .selectAll("li")
+            .data(datum.ingredients.split("^"))
+            .enter()
+            .append("li")
+            .html(v => v);
+        content.append("button")
+            .attr("onclick", `window.open('https://${datum.link}', '_blank')`)
+            .text("Original recipe");
+    }
+
+    const recipeSelectedInit = {"recipe_id": -1};
+    recipeSelected.set(recipeSelectedInit);
+    recipeSelected.subscribe((v) => {
+        if (v.recipe_id !== -1) {
+            showRecipe(v);
+            // drawLine([avgRecipe, getRecipeIngd(data, selectedRecipeId)], content);
+        }
+    })
 </script>
 
 <div class="dashboard">
@@ -21,19 +51,18 @@
                 </p>
             </div>
         </div>
-        <div id="main-viz"></div>
         <ul class="todo">
             <li>Collapse columns to show ingredient summ stats (frequencies, avg pct)</li>
             <li>Drag and drop to reorder rows/columns</li>
             <li>Order column and set color by ingredient groups</li>
-            {#await promise}
-                <p>...loading...</p>
-            {:then data}
-                <MainVis {data}/>
-            {:catch error}
-                <p>{error.message}</p>
-            {/await}
         </ul>
+        {#await promise}
+            <p>...loading...</p>
+        {:then data}
+            <MainVis {data}/>
+        {:catch error}
+            <p>{error.message}</p>
+        {/await}
     </div>
     <div class="col-2">
         <div id="details-view">
@@ -42,7 +71,7 @@
                 <li>Show recipe details when user clicks on a cell; can choose and compare multiple recipes</li>
                 <li>Show ingredient summ stats when user clicks on an ingredient (either on y-axis or on a term in the wiki paragraph); can choose multiple ingredients (upsetplot)</li>
             </ul>
-            <div id="recipe-box"></div>
+            <div id="detail-box" style="min-height:400px;"></div>
         </div>
         <div id="tool-row">
             <h2>Ingredient aggregation</h2>
