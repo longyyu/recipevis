@@ -17,14 +17,14 @@
             let key = getName(d);
             nodeX[key] = -d.height * gapX;
             if (d.height === 0) {
-                  // leaf nodes, height determined by corresponding bar
-                    nodeY[key] = yTrans(key);
+                // leaf nodes, height determined by corresponding bar
+                nodeY[key] = yTrans(key);
             } else {
-                  // non-leaf nodes, height is the average of its children's
-                    nodeY[key] = (
-                        d.children.map(d => nodeY[getName(d)])
-                            .reduce((a, b) => a + b) / d.children.length
-                  );
+                // non-leaf nodes, height is the average of its children's
+                nodeY[key] = (
+                    d.children.map(d => nodeY[getName(d)])
+                        .reduce((a, b) => a + b) / d.children.length
+                );
             } // if
             nodes[i]["ingdName"] = key;
         })
@@ -37,13 +37,13 @@
             .data(nodes.filter(d => d.depth !== 0))
             .join("path")
             .attr("d", function(d) {
-                  let dX = nodeX[d.ingdName], dY = nodeY[d.ingdName],
-                                dParX = nodeX[d.parent.ingdName], dParY = nodeY[d.parent.ingdName],
-                                dMidX = (dX + dParX) / 2;
-                  return `M${dX},${dY}`+
-                              `C${dMidX},${dY} `+
-                                `${dMidX},${dParY} `+
-                                `${dParX},${dParY}`;
+                let dX = nodeX[d.ingdName], dY = nodeY[d.ingdName],
+                    dParX = nodeX[d.parent.ingdName], dParY = nodeY[d.parent.ingdName],
+                    dMidX = (dX + dParX) / 2;
+                return `M${dX},${dY}`+
+                    `C${dMidX},${dY} `+
+                    `${dMidX},${dParY} `+
+                    `${dParX},${dParY}`;
             })
             .style("fill", "none")
             .attr("stroke", pathColor);
@@ -52,9 +52,7 @@
             .data(nodes.filter(d => d.height !== 0))
             .join("g")
             .style("transform", function(d) {
-                  return `translate(`+
-                              `${nodeX[d.ingdName]}px, `+
-                              `${nodeY[d.ingdName]}px)`
+                return `translate(${nodeX[d.ingdName]}px, ${nodeY[d.ingdName]}px)`
             })
             .style("opacity", nodeOpacityDefault)
 			.on("mouseover", function() {
