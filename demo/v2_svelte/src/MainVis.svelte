@@ -15,6 +15,7 @@
     let mainVisAggr = 0;
     function toggle() {
         mainVisAggr = 1 - mainVisAggr;
+        d3.selectAll(".tooltip").remove();
     }
 
     function computeAvgRecipe(data, numRecipes) {
@@ -61,18 +62,21 @@
         ingdMapLocal = v;
     })
 
-    $: width = svgWidth - margin.left;
+    $: width = svgWidth - margin.left - 5;
     $: xTrans = d3.scaleLinear()
-            .domain([0, 0.5])
+            .domain([0, d3.max(dataAggr.map(xAccessor))])
             .range([0, width]);
 
     $: {
-        let { maxDepth, ingdMapLayer } = unravel(ingdMapLocal);
-        if (Object.entries(ingdMapLayer).length !== 0) {
-            yDomain = sortIngd(dataAggr.map(yAccessor), ingdMapLayer[2]);
-        } else {
-            yDomain = dataAggr.map(yAccessor);
-        }
+        // // sort according to user entry
+        // let { maxDepth, ingdMapLayer } = unravel(ingdMapLocal);
+        // if (Object.entries(ingdMapLayer).length !== 0) {
+        //     yDomain = sortIngd(dataAggr.map(yAccessor), ingdMapLayer[2]);
+        // } else {
+        //     yDomain = dataAggr.map(yAccessor);
+        // }
+        // sort according to ingredient proportion
+        yDomain = dataAggr.sort((a, b) => xAccessor(b) - xAccessor(a)).map(yAccessor);
         height = rectHeight * yDomain.length;
         yTrans = d3.scaleBand()
             .domain(yDomain)
@@ -82,49 +86,38 @@
 </script>
 
 
-<div bind:clientWidth={svgWidth}>
+<div class="mainVis" bind:clientWidth={svgWidth}>
     {#if mainVisAggr}
     <button on:click={toggle}>Individual Recipe View</button>
     {:else}
     <button on:click={toggle}>Aggregated View</button>
     {/if}
-
-    <svg width={svgWidth} {height}>
-        <!-- {#if mainVisAggr} -->
-            <g class="bar-container"
-                style="transform: translate({margin.left}px, {margin.top}px);{mainVisAggr ? '' : 'display:none;'}">
-                <Bar
-                    data={dataAggr} {xAccessor} {yAccessor} {xTrans} {yTrans}
-                        barOpacity={0.5}
-                />
-            </g>
-        <!-- {:else} -->
-            <g class="tile-container"
-                style="transform: translate({margin.left}px, {margin.top}px);{mainVisAggr ? 'display:none;': ''}">
-                <Tile
-                    {data} {width} {yTrans} minOpacity={0.1}
-                />
-            </g>
-        <!-- {/if} -->
+    <svg width={svgWidth} height={height+margin.top}>
+        <g class="bar-container"
+            style="transform: translate({margin.left}px,{margin.top}px); {mainVisAggr ? '' : 'display:none;'}"> 
+            <Bar
+                data={dataAggr} {xAccessor} {yAccessor} {xTrans} {yTrans}
+                    barOpacity={0.5}
+            />
+        </g>
+        <g class="tile-container"
+            style="transform: translate({margin.left}px,{margin.top}px); {mainVisAggr ? 'display:none;': 'z-index=9;'}">
+            <Tile
+                {data} {width} {height} {margin} {yTrans} minOpacity={0.1}
+            />
+        </g>
         <g class="dendro-container"
-             style="transform: translate({margin.left-3}px, {margin.top+rectHeight/2}px);">
+             style="transform: translate({margin.left-3}px,{margin.top+rectHeight/2}px);">
             <MainDendro
-                    {ingdMapLocal}
-                    bind:yTrans={yTrans}
-                    gapX={30}
-                    nodeColor={"cadetblue"}
-                    pathColor={"#efefef"}
-                    nodeSize={3}
-                    nodeOpacityDefault={0.35},
-                    nodeOpacityHover={0.75}
+                {ingdMapLocal}
+                bind:yTrans={yTrans}
+                gapX={30}
+                nodeColor={"cadetblue"}
+                pathColor={"#efefef"}
+                nodeSize={4}
+                nodeOpacityDefault={0.45}
+                nodeOpacityHover={0.85}
             />
         </g>
     </svg>
 </div>
-
-<style>
-    button {
-        padding: 5px;
-        font-size: var(--font-size-small);
-    }
-</style>
