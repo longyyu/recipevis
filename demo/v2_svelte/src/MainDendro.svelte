@@ -61,7 +61,7 @@
 				d3.select(this).style("cursor", "pointer").style("opacity", nodeOpacityHover);
 			})
             .on("mouseout", function() {
-					d3.select(this).style("opacity", nodeOpacityDefault);
+                d3.select(this).style("opacity", nodeOpacityDefault);
 			});
         
         nonLeafNodes.append("circle")
@@ -69,11 +69,11 @@
             .style("fill", nodeColor);
 
         nonLeafNodes.append("text")
-                .attr("dx", -5)
+            .attr("dx", "-.5em")
             .text(d => d.ingdName)
-                .style("font-size", "12px")
+            .style("font-size", "var(--font-size-plot)")
             .style("fill", nodeColor)
-                .style("text-anchor", "end")
-                .style("alignment-baseline", "hanging");
+            .style("text-anchor", "end")
+            .style("alignment-baseline", "middle");
     }
 </script>
