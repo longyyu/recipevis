@@ -6,6 +6,7 @@
     --font-size-subheading: 25px;
     --font-size-read: 20px;
     --font-size-small: 18px;
+    --font-size-plot: 15px;
     --font-weight-normal: 300;
     --font-weight-heavy: 400;
     --font-family-accent: "Gill Sans", sans-serif;
@@ -82,4 +83,9 @@ h2{
 
 .points:hover {
     visibility: visible;
+}
+
+button {
+    padding: 5px;
+    font-size: var(--font-size-plot);
 }
