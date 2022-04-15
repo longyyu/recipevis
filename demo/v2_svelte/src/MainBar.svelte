@@ -2,16 +2,19 @@
     import * as d3 from 'd3';
     import { ingdMap } from './stores';
     import { unravel, sortIngd } from './helper.svelte';
+    import Bar from './Bar.svelte';
+    import MainDendro from './MainDendro.svelte';
 
-    let el,
-        ingdMapLocal,
-        width = 400,
-        height = 500; // initial height
     const rectHeight = 23,
         xAccessor = d => +d[1],
         yAccessor = d => d[0],
-        margin = {"left": 180, "top": 20},
-        tickFontSize = 14;
+        margin = {"left": 140, "top": 20};
+
+    let ingdMapLocal,
+        yDomain, xTrans, yTrans,
+        svgWidth = 400,
+        width = svgWidth - margin.left,
+        height = 500;
 
     ingdMap.subscribe((v) => {
         ingdMapLocal = v;
@@ -37,99 +40,49 @@
             "cinnamon": 0.00018308532010197706,
             "peanut butter": 0.004598992121681309
     });
-    height = rectHeight * data.map(yAccessor).length;
 
     $: {
-        d3.select(el).selectAll("svg").remove();
-        let svg = d3.select(el)
-            .append("svg")
-                        .attr("width", width)
-                        .attr("height", height)
-                .append("g")
-                        .style("transform", `translate(${margin.left}px, ${margin.top}px)`);
+        width = svgWidth - margin.left;
+        height = rectHeight * data.map(yAccessor).length;
 
         let { maxDepth, ingdMapLayer } = unravel(ingdMapLocal);
-        let yDomain;
+
         if (Object.entries(ingdMapLayer).length !== 0) {
             yDomain = sortIngd(data.map(yAccessor), ingdMapLayer[2]);
         } else {
             yDomain = data.map(yAccessor);
         }
-
-        let xTrans = d3.scaleLinear()
-                .domain([0, 0.5])
-                .range([0, width]),
-            // xAxis = svg.append("g")
-            //     .attr("id", "xaxis"),
-            yTrans = d3.scaleBand()
-                .domain(yDomain)
-                .range([0, height])
-                .padding(.1),
-            yAxis = svg.append("g")
-                .attr("id", "yaxis"),
-            yAxis2 = svg.append("g")
-                .attr("id", "yaxis2")
-                .style("transform", `translate(-${margin.left/2+14}px, 0px)`);
-
-        /* xAxis.call(d3.axisTop(xTrans)); */
-        yAxis.call(d3.axisLeft(yTrans).tickSize(0));
-        yAxis.call(g => g.selectAll(".tick").attr("font-size", `${tickFontSize}px`));
-        
-
-        if (Object.entries(ingdMapLayer).length !== 0) {
-            // get an object that maps a node (an ingd) to its parent
-            let root = d3.hierarchy(ingdMapLocal, function(d) {
-                return d.children;
-            });
-            let child2parent = {};
-            root.descendants().forEach((d) => {
-                let key = typeof d.data === "string" ? d.data : d.data.name;
-                if (d.parent !== null) {
-                    child2parent[key] = d.parent.data.name;    
-                }
-            })
-            yAxis2.call(
-                d3.axisLeft(yTrans)
-                    .tickSize(0)
-                    .tickFormat(d => child2parent[d])
-            );
-            yAxis2.call(g => g.select(".domain").attr("stroke", "#efefef"));
-            yAxis2.call(g => g.selectAll(".tick").attr("font-size", `${tickFontSize}px`));
-        }
-
-        let bars = svg
-            .append("g")
-            .attr("class", "bar")
-            .selectAll("g")
-                .data(data)
-                .join("g");
-
-        bars
-            .append('rect')
-            .attr('height', yTrans.bandwidth())
-            .attr('x', 0)
-            .attr('y', d => yTrans(yAccessor(d)))
-            .attr('fill', 'cadetblue')
-                .attr('opacity', 0.65)
-                .attr('width', 0);
-        
-        bars.selectAll('rect')
-            .transition()
-            .duration(400)
-            .attr('width', d => xTrans(xAccessor(d)));
-
-        bars.append('text')
-            .attr('x', d => 0)
-            .attr('y', d => yTrans(yAccessor(d)))
-            .attr('dy', '1em')
-            .text(d => xAccessor(d).toFixed(2))
-            .style('font-size', '12px');
-
-        bars.selectAll('text')
-            .transition()
-            .duration(400)
-            .attr('x', d => xTrans(xAccessor(d)));
+        xTrans = d3.scaleLinear()
+            .domain([0, 0.5])
+            .range([0, width]);
+        yTrans = d3.scaleBand()
+            .domain(yDomain)
+            .range([0, height])
+            .padding(.1);
     }
 </script>
 
-<div bind:this={el} bind:offsetWidth={width}></div>
+<div bind:clientWidth={svgWidth}>
+    <svg width={svgWidth} {height}>
+        <g class="bar-container"
+             style="transform: translate({margin.left}px, {margin.top}px);">
+            <Bar
+                {data} {xAccessor} {yAccessor} {xTrans} {yTrans}
+                    barOpacity={0.5}
+            />
+        </g>
+        <g class="dendro-container"
+             style="transform: translate({margin.left-3}px, {margin.top+rectHeight/2}px);">
+            <MainDendro
+                    {ingdMapLocal}
+                    bind:yTrans={yTrans}
+                    gapX={30}
+                    nodeColor={"cadetblue"}
+                    pathColor={"#efefef"}
+                    nodeSize={3}
+                    nodeOpacityDefault={0.35},
+                    nodeOpacityHover={0.75}
+            />
+        </g>
+    </svg>
+</div>
