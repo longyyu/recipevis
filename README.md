@@ -15,10 +15,63 @@ which pip
 
 ## Demo
 
-### V2 (2022.03.31)
+### Todo
 
-* Adopted Svelte framework to modularize code
-* Added auto granularity adjustments as user zooms in or out
+* Potential bugs
+    - Address scenario where the tree is not equal-height, mainly affects unravel? root.descendants is a workaround
+    - When there are more than 7 entries in the mapping relationships, the dendrogram becomes crowded
+    - What if category and ingredient has the same name (e.g. flour)? One idea would be to convert and store ingredient as all cap
+* Aggregate the other ingredients?
+* Recipe compare view
+* Add auto granularity adjustments as user zooms in or out
+
+### V2 (2022.04.14)
+
+* Used Svelte framework to modularize code
+    - Follow the code chunk below to install; run `npm run dev` to host
+
+```bash
+# install node.js if you have not
+npx degit sveltejs/template svelte_example
+cd svelte_example
+npm instsall
+# development
+npm run dev
+npm install d3
+```
+
+* Updated main visualization [demo]()
+    - Added bar chart ([jsfiddle](https://jsfiddle.net/qd6xnpbt/1/); [svelte](https://svelte.dev/repl/25258d66b89b4bafbdb7ddc48fdf426d?version=3.46.5))
+    - Added dendrogram as y-axis for both bar chart and heatmap
+
+![demo v2 preview](demo/thumbnails/v2a.gif)
+
+* Allowed user to customize ingredient-category mapping rules
+    - User input ingredient map to dendrogram [demo](https://svelte.dev/repl/9c0b21a04f094d8291c9ed98f93f0254?version=3.46.5)
+    - Test case:
+
+```
+{
+    "name": "ingredients",
+    "children": [
+        {"name": "sweentener", "children": [
+            "white sugar",
+            "brown sugar"
+        ]},
+        {"name": "leavener", "children": [
+            "baking soda", "baking powder"
+		]},
+		{"name": "fats", "children": [
+			"butter", "margarine", "shortening"
+		]},
+		{"name": "liquids", "children": [
+			"water", "milk"
+		]}
+    ]
+}
+```
+
+![demo v2 preview (when user customizes the ingredient-category relationship)](demo/thumbnails/v2b.gif)
 
 ### V1 (2022.03.17)
 
