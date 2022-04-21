@@ -10,7 +10,7 @@ What are some high-level rules that a food item follows? Is there a general form
 
 * Used Svelte framework to modularize code
     - Follow the code chunk below to install; run `npm run dev` to host
-* Updated main visualization [demo]()
+* Updated main visualization demo
     - Added bar chart ([jsfiddle](https://jsfiddle.net/qd6xnpbt/1/); [svelte](https://svelte.dev/repl/25258d66b89b4bafbdb7ddc48fdf426d?version=3.46.5))
     - Added dendrogram as y-axis for both bar chart and heatmap
 
