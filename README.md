@@ -1,29 +1,10 @@
-# recipevis
-Ongoing research project
+# RecipeVis: A Visual Tool for Understanding Food Items
 
-## Environment Setup
+*Ongoing research project*
 
-### Python Virtual Environment
+What are some high-level rules that a food item follows? Is there a general formula for chocolate chip cookies? Which ingredients are the must-haves, the alternatives, or the fun and funky additions? This project aims to build an interactive visual tool that will allow users to explore and analyze crowdsourced recipes, and find answers to the above questions. 
 
-```python
-python3 -m venv env
-source env/bin/activate
-echo $VIRTUAL_ENV
-which python3
-which pip
-```
-
-## Demo
-
-### Todo
-
-* Potential bugs
-    - Address scenario where the tree is not equal-height, mainly affects unravel? root.descendants is a workaround
-    - When there are more than 7 entries in the mapping relationships, the dendrogram becomes crowded
-    - What if category and ingredient has the same name (e.g. flour)? One idea would be to convert and store ingredient as all cap
-* Aggregate the other ingredients?
-* Recipe compare view
-* Add auto granularity adjustments as user zooms in or out
+## Changelog
 
 ### V2 (2022.04.14)
 
@@ -77,3 +58,27 @@ npm install d3
 
 ![demo v1 preview](demo/thumbnails/v1.png)
 ![demo v1 preview (when user clicks on a tile in the main visualization)](demo/thumbnails/v1b.png)
+
+
+## Environment Setup
+
+### Python Virtual Environment
+
+```python
+python3 -m venv env
+source env/bin/activate
+echo $VIRTUAL_ENV
+which python3
+which pip
+```
+
+## Todo
+
+* To fix
+    - Address scenario where the nodes in ingredient tree is not equal-depth
+        - mainly affects unravel? root.descendants is a workaround
+    - When there are more than 7 entries in the mapping relationships, the dendrogram becomes crowded
+    - What if category and ingredient has the same name (e.g. flour)? One idea would be to convert and store ingredient as all cap
+* Aggregate the "other" ingredients?
+* Recipe compare view
+* Add auto granularity adjustments as user zooms in or out
