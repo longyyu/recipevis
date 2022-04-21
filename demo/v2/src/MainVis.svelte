@@ -12,10 +12,13 @@
         yAccessor = d => d[0],
         margin = {"left": 140, "top": 20};
 
-    let mainVisAggr = 0;
-    function toggle() {
+    let mainVisAggr = 0, binaryColor = 0;
+    function toggleMainVisAggr() {
         mainVisAggr = 1 - mainVisAggr;
         d3.selectAll(".tooltip").remove();
+    }
+    function toggleBinaryColor() {
+        binaryColor = 1 - binaryColor;
     }
 
     function computeAvgRecipe(data, numRecipes) {
@@ -87,10 +90,13 @@
 
 
 <div class="mainVis" bind:clientWidth={svgWidth}>
-    {#if mainVisAggr}
-    <button on:click={toggle}>Individual Recipe View</button>
-    {:else}
-    <button on:click={toggle}>Aggregated View</button>
+    <button on:click={toggleMainVisAggr}>
+        {mainVisAggr ? "Individual Recipe" : "Aggregated"} View
+    </button>
+    {#if !mainVisAggr}
+    <button on:click={toggleBinaryColor}>
+        Show {binaryColor ? "Percentage" : "Binary"}
+    </button>
     {/if}
     <svg width={svgWidth} height={height+margin.top}>
         <g class="bar-container"
@@ -103,7 +109,7 @@
         <g class="tile-container"
             style="transform: translate({margin.left}px,{margin.top}px); {mainVisAggr ? 'display:none;': 'z-index=9;'}">
             <Tile
-                {data} {width} {height} {margin} {yTrans} minOpacity={0.1}
+                {data} {width} {height} {margin} {yTrans} minOpacity={0.1} {binaryColor}
             />
         </g>
         <g class="dendro-container"
