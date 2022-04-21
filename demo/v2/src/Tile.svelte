@@ -2,13 +2,17 @@
     import * as d3 from 'd3';
     import { recipeSelected } from './stores';
     
-    export let data, width, height, yTrans, minOpacity, margin;
+    export let data, width, height, yTrans, minOpacity, margin, binaryColor;
 
     const xAccessor = d => +d.recipe_id,
         yAccessor = d => d.ingd,
         opacityAccessor = d => (+d.ingd_pct),
-        opacityTrans = v => v === 0 ? 0 : minOpacity + v * 1.5,
+        opacityTransContinuous = v => v === 0 ? 0 : minOpacity + v * 1.5,
+        opacityTransBinary = v => v === 0 ? 0 : 0.55,
         tooltipOffsetX = 15;
+    let opacityTrans;
+
+    $: opacityTrans = binaryColor ? opacityTransBinary : opacityTransContinuous;
 
     $: {
         let xDomain = [...new Set(data.map(xAccessor))],
